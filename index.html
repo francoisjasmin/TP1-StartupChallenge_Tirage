@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Startup Challenge — Tirage des contraintes</title>
+<style>
+  :root{
+    --bg:#08111f;
+    --panel:#101b2d;
+    --panel-2:#15243a;
+    --text:#edf5ff;
+    --muted:#9db0c9;
+    --line:rgba(255,255,255,.11);
+    --accent:#67e8f9;
+    --accent2:#a78bfa;
+    --success:#5eead4;
+    --warning:#fbbf24;
+    --danger:#fb7185;
+    --shadow:0 24px 60px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(103,232,249,.13), transparent 25%),
+      radial-gradient(circle at 85% 10%, rgba(167,139,250,.16), transparent 27%),
+      radial-gradient(circle at 50% 85%, rgba(94,234,212,.08), transparent 30%),
+      var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+  }
+  body:before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size:32px 32px;
+    mask-image:linear-gradient(to bottom, black, transparent);
+  }
+  .orb{
+    position:fixed; border-radius:999px; filter:blur(8px); opacity:.2;
+    pointer-events:none; animation:float 9s ease-in-out infinite;
+  }
+  .orb.a{width:180px;height:180px;background:var(--accent);left:-60px;top:18%}
+  .orb.b{width:240px;height:240px;background:var(--accent2);right:-80px;top:42%;animation-delay:-4s}
+  @keyframes float{50%{transform:translateY(-28px) scale(1.05)}}
+  .app{width:min(1450px, calc(100% - 28px)); margin:0 auto; padding:26px 0 70px}
+  header{
+    display:flex; gap:20px; justify-content:space-between; align-items:center;
+    border:1px solid var(--line); background:rgba(16,27,45,.78); backdrop-filter:blur(18px);
+    border-radius:24px; padding:22px 24px; box-shadow:var(--shadow); position:sticky; top:12px; z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{
+    width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:27px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06111c;font-weight:900;
+    box-shadow:0 12px 32px rgba(103,232,249,.22);
+  }
+  h1{margin:0;font-size:clamp(1.2rem,2vw,2rem);letter-spacing:-.03em}
+  .subtitle{margin-top:4px;color:var(--muted);font-size:.92rem}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  button{
+    appearance:none;border:0;border-radius:14px;padding:11px 15px;font-weight:800;cursor:pointer;
+    transition:.2s transform,.2s opacity,.2s box-shadow,.2s background; font-size:.92rem;
+  }
+  button:hover:not(:disabled){transform:translateY(-2px)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .primary{background:linear-gradient(135deg,var(--accent),#38bdf8);color:#03121b;box-shadow:0 8px 24px rgba(56,189,248,.18)}
+  .secondary{background:#22344f;color:var(--text);border:1px solid var(--line)}
+  .danger{background:#3b1b2a;color:#ffdbe4;border:1px solid rgba(251,113,133,.3)}
+  .ghost{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+  .hero{
+    margin:28px 0;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;
+  }
+  .panel{
+    border:1px solid var(--line);border-radius:22px;background:rgba(16,27,45,.72);
+    box-shadow:var(--shadow);padding:22px;backdrop-filter:blur(10px)
+  }
+  .hero h2{font-size:clamp(1.5rem,3vw,2.6rem);line-height:1.05;margin:0 0 12px;letter-spacing:-.045em}
+  .hero p{color:var(--muted);line-height:1.55;margin:0}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .badge{
+    padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:800;border:1px solid var(--line);
+    background:rgba(255,255,255,.04)
+  }
+  .settings{display:grid;gap:12px}
+  label{font-size:.8rem;color:var(--muted);font-weight:700}
+  input{
+    width:100%;margin-top:5px;background:#091421;color:var(--text);border:1px solid var(--line);
+    border-radius:12px;padding:11px 12px;outline:none
+  }
+  input:focus{border-color:rgba(103,232,249,.65);box-shadow:0 0 0 3px rgba(103,232,249,.1)}
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .team-card{
+    position:relative;border:1px solid var(--line);border-radius:22px;padding:18px;
+    background:linear-gradient(180deg,rgba(21,36,58,.88),rgba(12,22,36,.88));
+    min-height:410px;overflow:hidden; box-shadow:var(--shadow);
+  }
+  .team-card:after{
+    content:"";position:absolute;width:160px;height:160px;border-radius:50%;right:-70px;top:-70px;
+    background:radial-gradient(circle,rgba(103,232,249,.12),transparent 68%);pointer-events:none
+  }
+  .team-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
+  .team-num{
+    width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(103,232,249,.12);
+    border:1px solid rgba(103,232,249,.25);font-weight:900;color:var(--accent)
+  }
+  .team-title{flex:1}
+  .team-title input{font-weight:800;font-size:1rem;margin:0;padding:9px 10px}
+  .status{
+    font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)
+  }
+  .cards{display:grid;gap:11px}
+  .draw-card{
+    perspective:1000px;height:94px;
+  }
+  .card-inner{
+    position:relative;width:100%;height:100%;transition:transform .75s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d;
+  }
+  .draw-card.revealed .card-inner{transform:rotateY(180deg)}
+  .face{
+    position:absolute;inset:0;border-radius:16px;padding:13px 14px;backface-visibility:hidden;
+    border:1px solid var(--line);display:flex;align-items:center;gap:12px;
+  }
+  .front{
+    justify-content:center;background:
+      linear-gradient(135deg,rgba(103,232,249,.10),rgba(167,139,250,.12)),
+      #0c1827;color:var(--muted)
+  }
+  .front .mystery{font-size:1.6rem;animation:pulse 1.7s ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(1.16);opacity:.65}}
+  .back{transform:rotateY(180deg);background:#112239}
+  .back.arch{border-color:rgba(103,232,249,.25)}
+  .back.event{border-color:rgba(251,191,36,.32);background:#231d13}
+  .icon{
+    flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:1.25rem;
+    background:rgba(255,255,255,.07)
+  }
+  .card-text strong{display:block;font-size:.9rem;line-height:1.1}
+  .card-text small{display:block;color:var(--muted);font-size:.74rem;line-height:1.25;margin-top:5px}
+  .team-actions{display:flex;gap:8px;margin-top:14px}
+  .team-actions button{flex:1}
+  .section-title{display:flex;justify-content:space-between;align-items:end;margin:28px 0 14px}
+  .section-title h3{margin:0;font-size:1.35rem}
+  .section-title p{margin:4px 0 0;color:var(--muted);font-size:.85rem}
+  .legend{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.8rem}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.arch{background:var(--accent)} .dot.event{background:var(--warning)}
+  .summary{
+    margin-top:22px;border:1px solid var(--line);border-radius:22px;background:rgba(16,27,45,.72);
+    padding:20px;box-shadow:var(--shadow)
+  }
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.88rem}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:0}
+  .empty{color:#6f839e}
+  .notice{
+    display:none;margin:14px 0 0;padding:12px 14px;border-radius:14px;background:rgba(94,234,212,.08);
+    border:1px solid rgba(94,234,212,.2);color:#cffff7;font-size:.85rem
+  }
+  .notice.show{display:block;animation:slideIn .4s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}}
+  .confetti{
+    position:fixed;top:-20px;width:10px;height:16px;border-radius:3px;z-index:99;
+    animation:fall var(--dur) linear forwards;transform:rotate(var(--rot));
+  }
+  @keyframes fall{to{transform:translate(var(--x),110vh) rotate(900deg);opacity:.8}}
+  .print-only{display:none}
+  .footer-note{color:var(--muted);font-size:.78rem;text-align:center;margin-top:18px}
+  @media(max-width:1050px){.team-grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr}}
+  @media(max-width:700px){header{position:static;align-items:flex-start;flex-direction:column}.toolbar{justify-content:flex-start}.team-grid{grid-template-columns:1fr}.app{width:min(100% - 16px,1450px)}}
+  @media print{
+    @page{size:landscape;margin:10mm}
+    body{background:white;color:#111;font-family:Arial,sans-serif}
+    body:before,.orb,header,.hero,.section-title,.team-grid,.footer-note,.notice{display:none!important}
+    .app{width:100%;padding:0}
+    .summary{display:block!important;background:white;border:0;box-shadow:none;padding:0;margin:0}
+    .print-only{display:block}
+    .print-only h1{font-size:22px;margin:0 0 4px}
+    .print-meta{margin:0 0 14px;color:#444}
+    table{font-size:10.5pt}
+    th,td{border:1px solid #aaa;padding:8px}
+    th{color:#111;background:#eee}
+  }
+</style>
+</head>
+<body>
+<div class="orb a"></div><div class="orb b"></div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🚀</div>
+      <div>
+        <h1>Startup Challenge — Tirage des contraintes</h1>
+        <div class="subtitle">2 cartes Architecture + 1 événement par équipe</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="drawAllBtn">🎲 Tirer pour les 6 équipes</button>
+      <button class="secondary" id="revealAllBtn" disabled>✨ Tout révéler</button>
+      <button class="secondary" id="printBtn" disabled>🖨️ Rapport imprimable</button>
+      <button class="danger" id="resetBtn">↺ Réinitialiser</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="panel">
+      <h2>Chaque startup reçoit son propre défi.</h2>
+      <p>
+        Le tirage attribue à chaque équipe <strong>deux contraintes architecturales distinctes</strong>
+        et <strong>un événement de faisabilité</strong>. Les cartes ne se répètent pas dans une même classe.
+        Révélez les résultats une équipe à la fois pour garder un effet de suspense devant la classe.
+      </p>
+      <div class="badge-row">
+        <span class="badge">🏗️ 18 cartes Architecture</span>
+        <span class="badge">⚡ 12 événements</span>
+        <span class="badge">👥 6 équipes</span>
+        <span class="badge">🖨️ Rapport de classe</span>
+      </div>
+      <div class="notice" id="savedNotice">✅ Tirage généré. Les résultats sont conservés dans ce navigateur jusqu'à la réinitialisation.</div>
+    </div>
+
+    <div class="panel settings">
+      <div>
+        <label for="className">Nom / groupe de la classe</label>
+        <input id="className" placeholder="Ex. 420-ABC — Groupe 01" />
+      </div>
+      <div>
+        <label for="teacherName">Enseignant(e) — optionnel</label>
+        <input id="teacherName" placeholder="Nom de l'enseignant(e)" />
+      </div>
+      <div>
+        <label for="projectLabel">Projet / session — optionnel</label>
+        <input id="projectLabel" placeholder="Ex. TP1 — Automne 2026" />
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title">
+    <div>
+      <h3>🎯 Équipes</h3>
+      <p>Vous pouvez renommer les équipes avant ou après le tirage.</p>
+    </div>
+    <div class="legend">
+      <span class="dot arch"></span> Architecture
+      <span class="dot event" style="margin-left:8px"></span> Événement
+    </div>
+  </div>
+
+  <main class="team-grid" id="teamGrid"></main>
+
+  <section class="summary" id="summary">
+    <div class="print-only">
+      <h1>Startup Challenge — Rapport de tirage</h1>
+      <p class="print-meta" id="printMeta"></p>
+    </div>
+    <div class="section-title" style="margin:0 0 6px">
+      <div>
+        <h3>📋 Résumé du tirage</h3>
+        <p>Cette section devient le rapport imprimable.</p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>Architecture 1</th>
+          <th>Architecture 2</th>
+          <th>Événement — Mission 5</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </section>
+
+  <div class="footer-note">
+    Conseil : projetez l'application, tirez toutes les cartes, puis révélez chaque équipe à tour de rôle.
+  </div>
+</div>
+
+<script>
+const ARCH_CARDS = [
+  {icon:"🔥", title:"Pic de trafic", desc:"Le nombre d'utilisateurs peut être multiplié par 20 pendant quelques heures."},
+  {icon:"📱", title:"Mobile prioritaire", desc:"60 % des utilisateurs accèdent au système depuis un téléphone."},
+  {icon:"🌎", title:"Internationalisation", desc:"Le produit doit pouvoir être lancé dans au moins 3 pays."},
+  {icon:"🔐", title:"Données sensibles", desc:"Le système traite des renseignements personnels nécessitant une protection renforcée."},
+  {icon:"☁️", title:"Haute disponibilité", desc:"Une interruption de service prolongée aurait un impact important sur les utilisateurs."},
+  {icon:"⚡", title:"Réponse rapide", desc:"Les opérations principales doivent donner une impression de réponse presque immédiate."},
+  {icon:"🔌", title:"API externe critique", desc:"Une fonctionnalité essentielle dépend d'un service externe que vous ne contrôlez pas."},
+  {icon:"📦", title:"Grand volume de données", desc:"La quantité de données pourrait augmenter rapidement après le lancement."},
+  {icon:"🔄", title:"Changements fréquents", desc:"Les règles d'affaires et fonctionnalités devraient évoluer souvent."},
+  {icon:"👥", title:"Profils multiples", desc:"Plusieurs types d'utilisateurs auront des permissions et parcours très différents."},
+  {icon:"🌐", title:"Réseau instable", desc:"Certains utilisateurs auront une connexion lente ou intermittente."},
+  {icon:"🧩", title:"Intégrations multiples", desc:"Votre solution devra communiquer avec plusieurs systèmes ou fournisseurs externes."},
+  {icon:"📈", title:"Croissance rapide", desc:"L'investisseur prévoit une croissance importante du nombre d'utilisateurs la première année."},
+  {icon:"🛡️", title:"Traçabilité", desc:"Les opérations importantes doivent pouvoir être retracées pour audit ou soutien."},
+  {icon:"🕒", title:"Traitements longs", desc:"Certaines opérations peuvent prendre plusieurs secondes ou minutes."},
+  {icon:"🏢", title:"Multi-organisation", desc:"Plusieurs organisations clientes utilisent le même produit tout en gardant leurs données séparées."},
+  {icon:"♿", title:"Accessibilité", desc:"L'interface doit être utilisable par un public ayant des besoins d'accessibilité variés."},
+  {icon:"🧱", title:"Évolution modulaire", desc:"Certaines parties du produit devront pouvoir évoluer sans modifier tout le système."}
+];
+
+const EVENTS = [
+  {icon:"💸", title:"API plus coûteuse", desc:"Votre fournisseur principal annonce 70 000 $ de frais supplémentaires par année."},
+  {icon:"⏱️", title:"Livraison accélérée", desc:"L'investisseur exige une première version 2 mois plus tôt que prévu."},
+  {icon:"👨‍💻", title:"Développeur indisponible", desc:"Un développeur clé n'est disponible que 50 % du temps pendant le projet."},
+  {icon:"📉", title:"Budget réduit", desc:"Le budget disponible est réduit de 20 %. Vous devez conserver un MVP crédible."},
+  {icon:"🚪", title:"Fournisseur abandonné", desc:"Un service externe envisagé annonce la fin de son produit dans 6 mois."},
+  {icon:"🔐", title:"Exigence sécurité", desc:"L'investisseur exige une révision importante des mesures de sécurité avant le lancement."},
+  {icon:"📱", title:"Priorité mobile", desc:"Le client exige maintenant une expérience mobile de très bonne qualité dès le MVP."},
+  {icon:"🌎", title:"Nouveau marché", desc:"Une occasion commerciale apparaît dans un autre pays et nécessite adaptation de langue et règles."},
+  {icon:"📈", title:"Succès inattendu", desc:"Les prévisions d'utilisateurs sont multipliées par 5 après une campagne de lancement."},
+  {icon:"🧪", title:"Qualité renforcée", desc:"Un partenaire exige davantage de tests et de preuves de qualité avant intégration."},
+  {icon:"🔌", title:"API instable", desc:"Les essais démontrent que votre API externe principale est parfois lente ou indisponible."},
+  {icon:"🧑‍💼", title:"Nouveau partenaire", desc:"Un partenaire majeur accepte de collaborer, mais impose l'intégration de son système."}
+];
+
+const TEAM_COUNT = 6;
+let assignments = null;
+
+const teamGrid = document.getElementById("teamGrid");
+const summaryBody = document.getElementById("summaryBody");
+const drawAllBtn = document.getElementById("drawAllBtn");
+const revealAllBtn = document.getElementById("revealAllBtn");
+const printBtn = document.getElementById("printBtn");
+const resetBtn = document.getElementById("resetBtn");
+const savedNotice = document.getElementById("savedNotice");
+
+function teamName(i){
+  const el = document.getElementById(`teamName${i}`);
+  return (el?.value || `Équipe ${i+1}`).trim() || `Équipe ${i+1}`;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function cardMarkup(type, slot, data, revealed=false){
+  const isEvent = type === "event";
+  return `
+  <div class="draw-card ${revealed ? "revealed":""}" data-slot="${slot}">
+    <div class="card-inner">
+      <div class="face front"><span class="mystery">${isEvent ? "⚡" : "?"}</span><span>${isEvent ? "Événement mystère" : "Carte Architecture"}</span></div>
+      <div class="face back ${isEvent ? "event":"arch"}">
+        <div class="icon">${data ? data.icon : "?"}</div>
+        <div class="card-text">
+          <strong>${data ? escapeHtml(data.title) : "En attente du tirage"}</strong>
+          <small>${data ? escapeHtml(data.desc) : "Cliquez sur « Tirer »."}</small>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderTeams(){
+  const oldNames = Array.from({length:TEAM_COUNT}, (_,i)=>document.getElementById(`teamName${i}`)?.value || `Équipe ${i+1}`);
+  teamGrid.innerHTML = "";
+  for(let i=0;i<TEAM_COUNT;i++){
+    const a = assignments?.[i];
+    const div = document.createElement("article");
+    div.className = "team-card";
+    div.dataset.team = i;
+    div.innerHTML = `
+      <div class="team-head">
+        <div class="team-num">${i+1}</div>
+        <div class="team-title"><input id="teamName${i}" value="${escapeHtml(oldNames[i])}" aria-label="Nom équipe ${i+1}" /></div>
+        <div class="status" id="status${i}">${a ? "Tiré":"En attente"}</div>
+      </div>
+      <div class="cards">
+        ${cardMarkup("arch","a1",a?.arch1,false)}
+        ${cardMarkup("arch","a2",a?.arch2,false)}
+        ${cardMarkup("event","event",a?.event,false)}
+      </div>
+      <div class="team-actions">
+        <button class="secondary draw-one" data-team="${i}" ${assignments ? "disabled":""}>🎲 Tirer</button>
+        <button class="primary reveal-one" data-team="${i}" ${a ? "":"disabled"}>✨ Révéler</button>
+      </div>`;
+    teamGrid.appendChild(div);
+  }
+  bindTeamButtons();
+  bindNameInputs();
+  updateSummary();
+}
+function bindNameInputs(){
+  document.querySelectorAll(".team-title input").forEach(inp=>{
+    inp.addEventListener("input", ()=>{ updateSummary(); saveState(); });
+  });
+}
+function bindTeamButtons(){
+  document.querySelectorAll(".draw-one").forEach(btn=>{
+    btn.addEventListener("click",()=>drawSingle(Number(btn.dataset.team)));
+  });
+  document.querySelectorAll(".reveal-one").forEach(btn=>{
+    btn.addEventListener("click",()=>revealTeam(Number(btn.dataset.team)));
+  });
+}
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function generateAll(){
+  const arch = shuffle(ARCH_CARDS);
+  const events = shuffle(EVENTS);
+  assignments = Array.from({length:TEAM_COUNT},(_,i)=>({
+    arch1:arch[i*2],
+    arch2:arch[i*2+1],
+    event:events[i]
+  }));
+  renderTeams();
+  revealAllBtn.disabled=false; printBtn.disabled=false;
+  savedNotice.classList.add("show");
+  saveState();
+  setTimeout(()=>document.querySelector(".team-grid").scrollIntoView({behavior:"smooth",block:"start"}),120);
+}
+function drawSingle(teamIndex){
+  // Create a complete class draw so uniqueness is guaranteed, but only mark this team as visible in UX.
+  if(!assignments){
+    const arch = shuffle(ARCH_CARDS), events=shuffle(EVENTS);
+    assignments = Array.from({length:TEAM_COUNT},(_,i)=>({arch1:arch[i*2],arch2:arch[i*2+1],event:events[i]}));
+    renderTeams();
+    revealAllBtn.disabled=false; printBtn.disabled=false;
+    savedNotice.classList.add("show");
+    saveState();
+  }
+  revealTeam(teamIndex);
+}
+function revealTeam(i){
+  const card = document.querySelector(`.team-card[data-team="${i}"]`);
+  if(!card || !assignments) return;
+  const cards=[...card.querySelectorAll(".draw-card")];
+  cards.forEach((c,idx)=>setTimeout(()=>c.classList.add("revealed"), idx*240));
+  document.getElementById(`status${i}`).textContent="Révélé";
+  setTimeout(()=>confetti(18),450);
+}
+function revealAll(){
+  if(!assignments) return;
+  for(let i=0;i<TEAM_COUNT;i++){
+    setTimeout(()=>revealTeam(i), i*380);
+  }
+  setTimeout(()=>confetti(60),TEAM_COUNT*380);
+}
+function confetti(count=30){
+  const symbols=["#67e8f9","#a78bfa","#5eead4","#fbbf24","#fb7185"];
+  for(let i=0;i<count;i++){
+    const el=document.createElement("div");
+    el.className="confetti";
+    el.style.left=Math.random()*100+"vw";
+    el.style.background=symbols[Math.floor(Math.random()*symbols.length)];
+    el.style.setProperty("--dur",(2.2+Math.random()*2.6)+"s");
+    el.style.setProperty("--x",(-120+Math.random()*240)+"px");
+    el.style.setProperty("--rot",(Math.random()*180)+"deg");
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),5200);
+  }
+}
+function updateSummary(){
+  summaryBody.innerHTML="";
+  for(let i=0;i<TEAM_COUNT;i++){
+    const a=assignments?.[i];
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td><strong>${escapeHtml(teamName(i))}</strong></td>
+      <td>${a ? `<strong>${escapeHtml(a.arch1.title)}</strong><br><span class="empty">${escapeHtml(a.arch1.desc)}</span>`:'<span class="empty">—</span>'}</td>
+      <td>${a ? `<strong>${escapeHtml(a.arch2.title)}</strong><br><span class="empty">${escapeHtml(a.arch2.desc)}</span>`:'<span class="empty">—</span>'}</td>
+      <td>${a ? `<strong>${escapeHtml(a.event.title)}</strong><br><span class="empty">${escapeHtml(a.event.desc)}</span>`:'<span class="empty">—</span>'}</td>`;
+    summaryBody.appendChild(tr);
+  }
+}
+function saveState(){
+  const state={
+    assignments,
+    names:Array.from({length:TEAM_COUNT},(_,i)=>teamName(i)),
+    className:document.getElementById("className").value,
+    teacherName:document.getElementById("teacherName").value,
+    projectLabel:document.getElementById("projectLabel").value
+  };
+  localStorage.setItem("startupChallengeDraw",JSON.stringify(state));
+}
+function loadState(){
+  const raw=localStorage.getItem("startupChallengeDraw");
+  if(!raw){renderTeams();return;}
+  try{
+    const s=JSON.parse(raw);
+    assignments=s.assignments || null;
+    renderTeams();
+    (s.names||[]).forEach((n,i)=>{const e=document.getElementById(`teamName${i}`);if(e)e.value=n;});
+    document.getElementById("className").value=s.className||"";
+    document.getElementById("teacherName").value=s.teacherName||"";
+    document.getElementById("projectLabel").value=s.projectLabel||"";
+    if(assignments){revealAllBtn.disabled=false;printBtn.disabled=false;savedNotice.classList.add("show");}
+    updateSummary();
+  }catch{renderTeams();}
+}
+function resetAll(){
+  if(!confirm("Réinitialiser complètement le tirage? Les résultats actuels seront perdus.")) return;
+  localStorage.removeItem("startupChallengeDraw");
+  assignments=null;
+  revealAllBtn.disabled=true;printBtn.disabled=true;savedNotice.classList.remove("show");
+  renderTeams();
+}
+function printReport(){
+  updateSummary();
+  const parts=[
+    document.getElementById("className").value,
+    document.getElementById("projectLabel").value,
+    document.getElementById("teacherName").value ? "Enseignant(e) : "+document.getElementById("teacherName").value : "",
+    "Date : "+new Date().toLocaleDateString("fr-CA")
+  ].filter(Boolean);
+  document.getElementById("printMeta").textContent=parts.join(" • ");
+  window.print();
+}
+drawAllBtn.addEventListener("click",generateAll);
+revealAllBtn.addEventListener("click",revealAll);
+printBtn.addEventListener("click",printReport);
+resetBtn.addEventListener("click",resetAll);
+["className","teacherName","projectLabel"].forEach(id=>document.getElementById(id).addEventListener("input",saveState));
+loadState();
+</script>
+</body>
+</html>
